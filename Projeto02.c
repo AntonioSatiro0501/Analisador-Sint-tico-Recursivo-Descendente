@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char lookahead;     // Vari·vel Global
+char lookahead;     // Vari√°vel Global
 
 /* PROTOTIPOS */
 int E(char palavra[], int *pos);
@@ -121,7 +121,7 @@ int F(char palavra[], int *pos){
 
     if(lookahead == '('){
         if(match('(',palavra,pos) &&
-           X(palavra,pos) &&
+           E(palavra,pos) &&
            match(')',palavra,pos)){
             return 1;
         }
