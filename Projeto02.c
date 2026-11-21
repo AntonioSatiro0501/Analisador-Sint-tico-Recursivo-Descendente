@@ -8,8 +8,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-char lookahead;     // Variável Global
+
+/* Variaveis Globais */
+char lookahead;     
+int posicaoErro = -1;
+char descricaoEsperado[100];
+char descricaoEncontrado[100];
 
 /* PROTOTIPOS */
 int E(char palavra[], int *pos);
@@ -20,12 +26,40 @@ int F(char palavra[], int *pos);
 int N(char palavra[], int *pos);
 int X(char palavra[], int *pos);
 
+
+/* PRADRONIZA LOOKAHEAD */
+void padronizaLookahead(char encontrado[]){
+    if(lookahead == '\0'){
+        strcpy(encontrado, "Encontrado: fim da expressao");
+    }
+    else{
+        sprintf(encontrado, "Encontrado: '%c'", lookahead);
+    }
+}
+
+/* ERRO */
+void erro(int posicao, char esperado[]){
+    char encontrado[100];
+
+    if(posicaoErro == -1){
+        posicaoErro = posicao;
+        padronizaLookahead(encontrado);
+        strcpy(descricaoEsperado, esperado);
+        strcpy(descricaoEncontrado, encontrado);
+    }
+}
+
 /* MATCH */
 int match(char t, char palavra[], int *pos){
+    char esperado[100];
+
     if(lookahead == t){
         lookahead = palavra[++(*pos)];
         return 1;
     }
+
+    sprintf(esperado, "Esperado: '%c'", t);
+    erro(*pos, esperado);
     return 0;
 }
 
@@ -66,6 +100,7 @@ int A(char palavra[], int *pos){
         return 1;
     }
 
+    erro(*pos, "Esperado: operador (+, -, *, /), ')' ou fim da expressao");
     return 0;
 }
 
@@ -109,6 +144,7 @@ int B(char palavra[], int *pos){
         return 1;
     }
 
+    erro(*pos, "Esperado: operador (+, -, *, /), ')' ou fim da expressao");
     return 0;
 }
 
@@ -153,6 +189,7 @@ int N(char palavra[], int *pos){
         return 0;
     }
 
+    erro(*pos, "Esperado: digito (0-9)");
     return 0;
 }
 
@@ -174,12 +211,18 @@ int X(char palavra[], int *pos){
         return 1;
     }
 
+    erro(*pos, "Esperado: digito (0-9), operador (+, -, *, /), ')' ou fim da expressao");
     return 0;
 }
 
 /* TRATAMENTO DE ERRO */
-void trataErro(){
-    printf("\n\nERRO DE SINTAXE!\n\n");
+void trataErro(char palavra[]){
+    printf("\nERRO DE SINTAXE!\n\n");
+    printf("Palavra: %s\n", palavra);
+    printf("Posicao do erro: %d\n", posicaoErro + 1);
+    printf("%s\n", descricaoEsperado);
+    printf("%s\n\n", descricaoEncontrado);
+    
 }
 
 /* MAIN */
@@ -192,11 +235,18 @@ int main(){
 
     printf("\nExpressao analisada: %s\n", palavra);
 
-    if(E(palavra, &pos) && lookahead == '\0'){
-        printf("\nExpressao reconhecida!\n\n");
+    if(palavra[0] == '\0'){
+        erro(0, "Esperado: digito (0-9), '(' ou '-' (expressao vazia)");
+        trataErro(palavra);
     }
     else{
-        trataErro();
+        if(E(palavra, &pos) && lookahead == '\0'){
+            printf("\nExpressao reconhecida!\n\n");
+        }
+        else{
+            erro(pos, "Esperado: fim da expressao");
+            trataErro(palavra);
+        }
     }
 
     system("PAUSE");
